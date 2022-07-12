@@ -1,15 +1,19 @@
 const principalGrid = document.getElementById("grid");
 const lineDiv = document.getElementById("line");
-const imgVez = document.getElementById("imgVez");
+const imgJogadorDaVez = document.getElementById("imgVez");
 const mostraVez = document.getElementById("mostraVez");
+const winner = document.getElementById("winner");
+const winnerChild = [...winner.children];
 
 var squares = []
 
 var values = Array(9).fill(-2);
-var JogadorDaVez = true; //true = X, false = O
+var JogadorDaVez = Math.random() < 0.5; //50% de chance true = X, false = O
+
+updatePlayer();
 
 let lineWidth = 630;
-let win = false;
+let finish = false;
 
 lineDiv.style.width = lineWidth + 'px';
 
@@ -24,13 +28,12 @@ for (let i = 0; i < 9; i++) {
         updateSquare(i);
       });
       
-      console.log(getOffset(nSquare));
     squares.push(nSquare);
 }
 
 function updateSquare(index)
 {
-    if(win) {return;}
+    if(finish) {return;}
 
     var square = squares[index];
 
@@ -39,24 +42,33 @@ function updateSquare(index)
     setToValues(index, getJogador());
 
     WinCheck();
-    atualizaJogador()
+    updatePlayer()
 }
 
-function atualizaJogador(){
+function updatePlayer(){
     JogadorDaVez = !JogadorDaVez;
     
-    imgVez.className = getJogador().value;
+    imgJogadorDaVez.className = getJogador().value;
 }
 
 function Win(winInfo)
 {
-    if(winInfo)
+    if(winInfo){
         createLine(winInfo);
-        
-    win = true;
+        console.log(winnerChild);
 
+        winnerChild.forEach((a) => a.className = winInfo.whoWin);
+    }else{
+
+        winner.childNodes[2].textContent = "Empate";
+        winnerChild[0].className = "O";
+    }
+
+    finish = true;
+
+    winner.style.animationName = "showUp";
     mostraVez.innerHTML = "Fim de Jogo";
-    delete imgVez;
+    delete imgJogadorDaVez;
 }
 
 function createLine(winInfo){
@@ -74,14 +86,14 @@ function createLine(winInfo){
     let gridLeft = (offset.left - offset.width); //middle
 
     switch(winPos[0]){
-        case 'h':
+        case 'h': //horizontal
             
             let distanceY = offset.height * parseInt(winPos[1]);
             gridTop = distanceY + offset0.top + (offset.height/2) - (lineHeight/2);
             gridLeft -= offsetX;
 
             break;
-        case 'v':
+        case 'v': //vertical
 
             gridTop = 0;
             let distanceX = offset.height * parseInt(winPos[1]);
@@ -90,7 +102,8 @@ function createLine(winInfo){
             changeRotation(90);
 
             break;
-        case 'c':
+        case 'c': //diagonal
+
             //raiz quadrada de 2 * tamanho da linha
             lineDiv.style.width = (lineWidth * (2 ** 0.5)) + 'px';
             gridLeft -= offsetX;
@@ -131,11 +144,6 @@ function changeRotation(rot){
 
 function WinCheck()
 {
-    if(!values.includes(-2)){
-        Win(null);
-        return;
-    }
-
     let toVerify = [];
     let VerifyType = [];
     
@@ -179,18 +187,20 @@ function WinCheck()
         }
     }
     
+    if(!values.includes(-2)){
+        Win(null);
+        return;
+    }
+
     return {win:false};
 }
 
 function getOffset(el) {
     const rect = el.getBoundingClientRect();
-    
     return {
         width: rect.width,
         height: rect.height,
       left: rect.left + window.scrollX,
       top: rect.top + window.scrollY,
-      x: rect.top - (rect.width/2),
-      y: rect.left - (rect.height/2)
     };
   }
