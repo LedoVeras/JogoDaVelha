@@ -4,6 +4,10 @@ const imgJogadorDaVez = document.getElementById("imgVez");
 const mostraVez = document.getElementById("mostraVez");
 const winner = document.getElementById("winner");
 const winnerChild = [...winner.children];
+const restartButton = document.getElementById("restart");
+
+//tirar botão da tela
+restartButton.style.top = "-100%";
 
 var squares = []
 
@@ -17,6 +21,10 @@ let finish = false;
 
 lineDiv.style.width = lineWidth + 'px';
 
+restartButton.addEventListener("click", function() {
+    restart();
+  });
+
 for (let i = 0; i < 9; i++) {
     let nSquare = document.createElement("div");
 
@@ -29,6 +37,10 @@ for (let i = 0; i < 9; i++) {
       });
       
     squares.push(nSquare);
+}
+
+function restart(){
+    document.location.reload(true)
 }
 
 function updateSquare(index)
@@ -69,6 +81,9 @@ function Win(winInfo)
     winner.style.animationName = "showUp";
     mostraVez.innerHTML = "Fim de Jogo";
     delete imgJogadorDaVez;
+
+    restartButton.style.top = "50%";
+    restartButton.style.animationName = "showUp";
 }
 
 function createLine(winInfo){
